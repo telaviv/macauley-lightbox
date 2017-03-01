@@ -26,9 +26,19 @@ const createGiphyURL = (query) => {
 const fetchGiphyData = (query) => {
   return fetchJSON(createGiphyURL(query)).then((response) => {
     return response.data.map((data) => ({
-      movie: data.images.looping.mp4,
-      image: data.images.downsized_still.url,
+      movieUrl: data.images.downsized.url,
+      imageUrl: data.images.downsized_still.url,
     }));
+  });
+};
+
+const loadVideoElement = (url) => {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.addEventListener('loadeddata', () => {
+      resolve(video);
+    });
+    video.src = url;
   });
 };
 
@@ -67,7 +77,11 @@ class GiphyMediaState {
     // second method. It's also weird to have a constructor with a side effect of making
     // 20 requests.
 
-    fetchGiphyData(query);
+    fetchGiphyData(query).then((giphyData) => {
+      for (let { movieUrl } of giphyData) {
+        loadVideoElement(movieUrl).then(video => console.log(video));
+      }
+    });
     return this;
   }
 }

@@ -22,8 +22,10 @@ const createGiphyURL = (query) => {
 }
 
 const fetchGiphyData = (query) => {
-  debugger;
   return fetchJSON(createGiphyURL(query)).then((response) => {
-    return response.data.map(data => data.images.looping.mp4);
+    return response.data.map((data) => ({
+      movie: data.images.looping.mp4,
+      image: data.images.downsized_still.url,
+    }));
   });
 };

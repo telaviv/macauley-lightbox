@@ -1,6 +1,6 @@
 const fetchJSON = (url) => {
   return new Promise((resolve, reject) => {
-    var request = new XMLHttpRequest();
+    const request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.onload = () => {
       if (request.status >= 200 && request.status < 300) {
@@ -13,4 +13,17 @@ const fetchJSON = (url) => {
     }
     request.send();
   })
+};
+
+const createGiphyURL = (query) => {
+  const base =  'http://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q=';
+  const queryParam = query.replace(' ', '+');
+  return base + queryParam;
+}
+
+const fetchGiphyData = (query) => {
+  debugger;
+  return fetchJSON(createGiphyURL(query)).then((response) => {
+    return response.data.map(data => data.images.looping.mp4);
+  });
 };

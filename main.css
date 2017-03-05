@@ -14,3 +14,9 @@
     height: 100%;
     background-color: red;
 }
+
+.lightbox {
+    width: 400px;
+    height: 400px;
+    background-color: white;
+}

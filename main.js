@@ -148,15 +148,7 @@ class OverlayComponent {
     this.mediaState = mediaState;
     this.index = 0;
 
-    document.onkeydown = (event) => {
-      if (event.keyCode === LEFT_KEY) {
-        this.index = Math.max(0, this.index - 1);
-      } else if (event.keyCode === RIGHT_KEY) {
-        this.index = Math.min(this.mediaState.state.length - 1, this.index + 1);
-      }
-      console.log('index', this.index);
-      this.updateLightbox();
-    }
+    document.onkeydown = this.bindKeypresses.bind(this);
   }
 
   show() {
@@ -164,12 +156,26 @@ class OverlayComponent {
     this.overlayElem.className = 'overlay show';
   }
 
+  bindKeypresses(event) {
+    if (event.keyCode === LEFT_KEY) {
+      this.index = Math.max(0, this.index - 1);
+    } else if (event.keyCode === RIGHT_KEY) {
+      this.index = Math.min(this.mediaState.state.length - 1, this.index + 1);
+    }
+    this.updateLightbox();
+  }
+
   updateLightbox() {
-    const videoElem = this.mediaState.state[this.index].videoElement.el;
-    this.lightboxElem.innerHTML = '';
-    this.lightboxElem.appendChild(videoElem);
-    videoElem.play();
-    this.centerElem.style.backgroundColor = this.mediaState.state[this.index].color.color;
+    const videoElem = this.mediaState.state[this.index].videoElement;
+    const color = this.mediaState.state[this.index].color;
+    if (videoElem.status === 'succeeded') {
+      this.lightboxElem.innerHTML = '';
+      this.lightboxElem.appendChild(videoElem.el);
+      videoElem.el.play();
+    }
+    if (color.status === 'succeeded') {
+      this.centerElem.style.backgroundColor = color.color;
+    }
   }
 }
 

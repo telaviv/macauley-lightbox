@@ -196,9 +196,9 @@ const OVERLAY = new OverlayComponent(
   document.querySelector('.overlay')
 );
 
-document.querySelectorAll('.gallery').forEach((galleryElem) => {
-  addEventListener('click', (el) => {
-    const gallery = GIPHY_GALLERIES[galleryElem.dataset.query]
+document.querySelectorAll('.gallery').forEach(() => {
+  addEventListener('click', (event) => {
+    const gallery = GIPHY_GALLERIES[event.target.parentElement.dataset.query]
     OVERLAY.display(gallery);
     document.querySelector('.wrapper').className = 'wrapper blur';
   })

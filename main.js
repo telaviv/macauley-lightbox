@@ -5,7 +5,7 @@ const fetchJSON = (url) => {
     const request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.onload = () => {
-      if (request.status >= 200 && request.status < 300) {
+      if (request.status >= 200 && request.status < 400) {
         resolve(JSON.parse(request.responseText));
       } else {
         // we won't be actually do any error checking for this mini project
@@ -33,14 +33,50 @@ const fetchGiphyData = (query) => {
 };
 
 const loadVideoElement = (url) => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const video = document.createElement('video');
-    video.addEventListener('loadeddata', () => {
-      resolve(video);
-    });
+    video.addEventListener('loadeddata', () => resolve(video));
+    video.addEventListener('error', reject);
     video.src = url;
   });
 };
+
+const loadImageElement = (url) => {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.crossOrigin = 'Anonymous';
+    image.src = url;
+  });
+}
+
+const loadImageDataFromElement = (imageElem) => {
+  const width = imageElem.naturalWidth;
+  const height = imageElem.naturalHeight;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext('2d');
+  context.drawImage(imageElem, 0, 0);
+  return context.getImageData(0, 0, width, height);
+}
+
+const averageColor = (imageData) => {
+  const sums = {r: 0, g: 0, b: 0 };
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    sums.r += imageData.data[i];
+    sums.g += imageData.data[i + 1];
+    sums.b += imageData.data[i + 2];
+  }
+  const pixelCount = imageData.data.length / 4;
+  const r = (sums.r / pixelCount).toFixed(0);
+  const g = (sums.g / pixelCount).toFixed(0);
+  const b = (sums.b / pixelCount).toFixed(0);
+  return `rgb(${r}, ${g}, ${b})`;
+}
 
 class GiphyMediaState {
   /* An array of giphy data that async loads over time.
@@ -62,26 +98,41 @@ class GiphyMediaState {
 
      When either of these values are undefined, then the data is not loaded yet.
   */
-  constructor() {
+  constructor(query) {
     this.state = [];
     // note: make 10 a constant;
     for (let i = 0; i < 10; ++i) {
-      this.state.push({});
+      this.state.push({
+        videoElement: { status: 'loading'},
+        color: { status: 'loading'},
+      });
     }
+    this.load(query);
   }
 
   load(query) {
-    // Load the giphy query into the GiphyMediaState
-    //
-    // It's a bit odd to have what is essentially the second part of the constructor be a
-    // second method. It's also weird to have a constructor with a side effect of making
-    // 20 requests.
-
     fetchGiphyData(query).then((giphyData) => {
-      for (let { movieUrl } of giphyData) {
-        loadVideoElement(movieUrl).then(video => console.log(video));
-      }
+      giphyData.forEach(({ movieUrl, imageUrl }, i) => {
+        loadVideoElement(movieUrl).then((videoElement) => {
+          this.state[i].videoElement = {
+            status: 'succeeded',
+            el: videoElement,
+          };
+        }).catch(() => {
+          this.state[i].videoElement = { status: 'failed' };
+        });
+        loadImageElement(imageUrl)
+          .then(loadImageDataFromElement)
+          .then(averageColor)
+          .then((color) => {
+            this.state[i].color = {
+              status: 'succeeded',
+              color,
+            };
+          }).catch(() => {
+            this.state[i].videoElement = { status: 'failed' };
+          });
+      });
     });
-    return this;
   }
 }

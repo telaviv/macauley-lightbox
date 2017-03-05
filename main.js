@@ -19,14 +19,15 @@ const fetchJSON = (url) => {
   })
 };
 
-const createGiphyURL = (query) => {
-  const base =  'http://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&&limit=10&q=';
-  const queryParam = query.replace(' ', '+');
-  return base + queryParam;
+const createGiphyURL = (query, count) => {
+  const base =  'http://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&';
+  const limitParam = 'limit=' + count;
+  const queryParam = 'q=' + query.replace(' ', '+');
+  return base + limitParam + '&' + queryParam;
 }
 
-const fetchGiphyData = (query) => {
-  return fetchJSON(createGiphyURL(query)).then((response) => {
+const fetchGiphyData = (query, count) => {
+  return fetchJSON(createGiphyURL(query, count)).then((response) => {
     return response.data.map((data) => ({
       movieUrl: data.images.downsized_small.mp4,
       imageUrl: data.images.downsized_still.url,
@@ -102,20 +103,19 @@ class GiphyMediaState {
 
      When either of these values are undefined, then the data is not loaded yet.
   */
-  constructor(query) {
+  constructor(query, count) {
     this.state = [];
-    // note: make 10 a constant;
-    for (let i = 0; i < 10; ++i) {
+    for (let i = 0; i < count; ++i) {
       this.state.push({
         videoElement: { status: 'loading'},
         color: { status: 'loading'},
       });
     }
-    this.load(query);
+    this.load(query, count);
   }
 
-  load(query) {
-    fetchGiphyData(query).then((giphyData) => {
+  load(query, count) {
+    fetchGiphyData(query, count).then((giphyData) => {
       giphyData.forEach(({ movieUrl, imageUrl }, i) => {
         loadVideoElement(movieUrl).then((videoElement) => {
           this.state[i].videoElement = {
@@ -147,6 +147,7 @@ class OverlayComponent {
     this.centerElem = overlayElem.querySelector('.center');
     this.lightboxElem = overlayElem.querySelector('.lightbox');
     this.index = 0;
+    this.hideListener = () => {};
 
     document.onkeydown = this.bindKeypresses.bind(this);
   }
@@ -159,6 +160,7 @@ class OverlayComponent {
 
   hide() {
     this.overlayElem.className = 'overlay hide';
+    this.hideListener();
   }
 
   bindKeypresses(event) {
@@ -187,14 +189,18 @@ class OverlayComponent {
 }
 
 const GIPHY_GALLERIES = {
-  'home alone': new GiphyMediaState('home alone'),
-  'my girl': new GiphyMediaState('my girl'),
-  'party monster': new GiphyMediaState('party monster'),
+  'home alone': new GiphyMediaState('home alone', 10),
+  'my girl': new GiphyMediaState('my girl', 4),
+  'party monster': new GiphyMediaState('party monster', 10),
 }
 
 const OVERLAY = new OverlayComponent(
   document.querySelector('.overlay')
 );
+
+OVERLAY.hideListener = () => {
+  document.querySelector('.wrapper').className = 'wrapper';
+}
 
 document.querySelectorAll('.gallery').forEach(() => {
   addEventListener('click', (event) => {

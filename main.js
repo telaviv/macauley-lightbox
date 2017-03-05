@@ -180,6 +180,7 @@ class OverlayComponent {
     if (videoElem.status === 'succeeded') {
       this.lightboxElem.innerHTML = '';
       this.lightboxElem.appendChild(videoElem.el);
+      // removing elements has a side effect of pausing them.
       videoElem.el.play();
     }
     if (color.status === 'succeeded') {
@@ -204,6 +205,9 @@ OVERLAY.hideListener = () => {
 
 document.querySelectorAll('.gallery').forEach(() => {
   addEventListener('click', (event) => {
+    if (!event.target.parentElement.dataset.query) {
+      return;
+    }
     const gallery = GIPHY_GALLERIES[event.target.parentElement.dataset.query]
     OVERLAY.display(gallery);
     document.querySelector('.wrapper').className = 'wrapper blur';

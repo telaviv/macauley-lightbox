@@ -136,3 +136,13 @@ class GiphyMediaState {
     });
   }
 }
+
+
+document.querySelector('button').addEventListener('click', () => {
+  const style = document.querySelector('.overlay').style;
+  style.position = 'absolute';
+  style.display = 'block';
+  style.width = '100%';
+  style.height = '100%';
+  style.backgroundColor = 'red';
+})

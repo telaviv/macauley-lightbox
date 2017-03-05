@@ -83,7 +83,7 @@ const averageColor = (imageData) => {
   return `rgba(${r}, ${g}, ${b}, 0.75)`;
 }
 
-class GiphyMediaState {
+class GalleryState {
   /* An array of giphy data that async loads over time.
 
      Displaying a gif in this lightbox design takes two pieces of information
@@ -101,9 +101,14 @@ class GiphyMediaState {
          videoElement - The video element of the gif.
          color - A string that can be a css property value.
 
-     When either of these values are undefined, then the data is not loaded yet.
+     Each of these properties also has a "status" property which can be "succeeded",
+     "failed" or "loading".
+
+
+
   */
   constructor(query, count) {
+    this.updateListener = () => {};
     this.state = [];
     for (let i = 0; i < count; ++i) {
       this.state.push({
@@ -114,6 +119,14 @@ class GiphyMediaState {
     this.load(query, count);
   }
 
+  addListener(listener) {
+    this.updateListener = listener;
+  }
+
+  removeListener() {
+    this.updateListener = () => {};
+  }
+
   load(query, count) {
     fetchGiphyData(query, count).then((giphyData) => {
       giphyData.forEach(({ movieUrl, imageUrl }, i) => {
@@ -122,6 +135,7 @@ class GiphyMediaState {
             status: 'succeeded',
             el: videoElement,
           };
+          this.updateListener(i);
         }).catch(() => {
           this.state[i].videoElement = { status: 'failed' };
         });
@@ -153,11 +167,22 @@ class OverlayComponent {
   }
 
   display(mediaState, loadingSrc) {
+    if (this.mediaState) {
+      this.mediaState.removeListener();
+    }
     this.mediaState = mediaState;
+    this.mediaState.addListener(this.onGalleryUpdate.bind(this));
+
     this.loadingSrc = loadingSrc;
     this.index = 0;
     this.updateLightbox();
     this.overlayElem.className = 'overlay show';
+  }
+
+  onGalleryUpdate(index) {
+    if (index === this.index) {
+      this.updateLightbox();
+    }
   }
 
   hide() {
@@ -216,9 +241,9 @@ class OverlayComponent {
 }
 
 const GIPHY_GALLERIES = {
-  'home alone': new GiphyMediaState('home alone', 10),
-  'my girl': new GiphyMediaState('my girl', 4),
-  'party monster': new GiphyMediaState('party monster', 10),
+  'home alone': new GalleryState('home alone', 10),
+  'my girl': new GalleryState('my girl', 4),
+  'party monster': new GalleryState('party monster', 10),
 }
 
 const OVERLAY = new OverlayComponent(

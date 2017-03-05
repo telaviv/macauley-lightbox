@@ -1,5 +1,8 @@
 'use strict';
 
+const LEFT_KEY = 37;
+const RIGHT_KEY = 39;
+
 const fetchJSON = (url) => {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
@@ -144,6 +147,16 @@ class OverlayComponent {
     this.lightboxElem = overlayElem.querySelector('.lightbox');
     this.mediaState = mediaState;
     this.index = 0;
+
+    document.onkeydown = (event) => {
+      if (event.keyCode === LEFT_KEY) {
+        this.index = Math.max(0, this.index - 1);
+      } else if (event.keyCode === RIGHT_KEY) {
+        this.index = Math.min(this.mediaState.state.length - 1, this.index + 1);
+      }
+      console.log('index', this.index);
+      this.updateLightbox();
+    }
   }
 
   show() {
@@ -153,7 +166,9 @@ class OverlayComponent {
 
   updateLightbox() {
     const videoElem = this.mediaState.state[this.index].videoElement.el;
+    this.lightboxElem.innerHTML = '';
     this.lightboxElem.appendChild(videoElem);
+    videoElem.play();
     this.centerElem.style.backgroundColor = this.mediaState.state[this.index].color.color;
   }
 }

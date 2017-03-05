@@ -142,17 +142,17 @@ class GiphyMediaState {
 }
 
 class OverlayComponent {
-  constructor(overlayElem, mediaState) {
+  constructor(overlayElem) {
     this.overlayElem = overlayElem;
     this.centerElem = overlayElem.querySelector('.center');
     this.lightboxElem = overlayElem.querySelector('.lightbox');
-    this.mediaState = mediaState;
     this.index = 0;
 
     document.onkeydown = this.bindKeypresses.bind(this);
   }
 
-  show() {
+  display(mediaState) {
+    this.mediaState = mediaState;
     this.updateLightbox();
     this.overlayElem.className = 'overlay show';
   }
@@ -186,12 +186,20 @@ class OverlayComponent {
   }
 }
 
+const GIPHY_GALLERIES = {
+  'home alone': new GiphyMediaState('home alone'),
+  'my girl': new GiphyMediaState('my girl'),
+  'party monster': new GiphyMediaState('party monster'),
+}
+
 const OVERLAY = new OverlayComponent(
-  document.querySelector('.overlay'),
-  new GiphyMediaState('home alone')
+  document.querySelector('.overlay')
 );
 
-document.querySelector('.gallery').addEventListener('click', () => {
-  OVERLAY.show();
-  document.querySelector('.wrapper').className = 'wrapper blur';
+document.querySelectorAll('.gallery').forEach((galleryElem) => {
+  addEventListener('click', (el) => {
+    const gallery = GIPHY_GALLERIES[galleryElem.dataset.query]
+    OVERLAY.display(gallery);
+    document.querySelector('.wrapper').className = 'wrapper blur';
+  })
 });

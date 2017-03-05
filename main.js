@@ -8,8 +8,6 @@ const fetchJSON = (url) => {
       if (request.status >= 200 && request.status < 400) {
         resolve(JSON.parse(request.responseText));
       } else {
-        // we won't be actually do any error checking for this mini project
-        // it's nice to know how we'd do it though.
         reject(request);
       }
     }
@@ -26,7 +24,7 @@ const createGiphyURL = (query) => {
 const fetchGiphyData = (query) => {
   return fetchJSON(createGiphyURL(query)).then((response) => {
     return response.data.map((data) => ({
-      movieUrl: data.images.downsized.url,
+      movieUrl: data.images.downsized_small.mp4,
       imageUrl: data.images.downsized_still.url,
     }));
   });
@@ -37,6 +35,8 @@ const loadVideoElement = (url) => {
     const video = document.createElement('video');
     video.addEventListener('loadeddata', () => resolve(video));
     video.addEventListener('error', reject);
+    video.autoplay = true;
+    video.loop = true;
     video.src = url;
   });
 };
@@ -137,8 +137,30 @@ class GiphyMediaState {
   }
 }
 
+class OverlayComponent {
+  constructor(overlayElem, mediaState) {
+    this.overlayElem = overlayElem;
+    this.lightboxElem = overlayElem.querySelector('.lightbox');
+    this.mediaState = mediaState;
+    this.index = 0;
+  }
+
+  show() {
+    this.updateLightbox();
+    this.overlayElem.className = 'overlay show';
+  }
+
+  updateLightbox() {
+    const videoElem = this.mediaState.state[this.index].videoElement.el;
+    this.lightboxElem.appendChild(videoElem);
+  }
+}
+
+const OVERLAY = new OverlayComponent(
+  document.querySelector('.overlay'),
+  new GiphyMediaState('home alone')
+);
 
 document.querySelector('button').addEventListener('click', () => {
-  const overlay = document.querySelector('.overlay');
-  overlay.className = 'overlay show';
-})
+  OVERLAY.show();
+});

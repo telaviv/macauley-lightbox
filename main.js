@@ -140,6 +140,7 @@ class GiphyMediaState {
 class OverlayComponent {
   constructor(overlayElem, mediaState) {
     this.overlayElem = overlayElem;
+    this.centerElem = overlayElem.querySelector('.center');
     this.lightboxElem = overlayElem.querySelector('.lightbox');
     this.mediaState = mediaState;
     this.index = 0;
@@ -153,6 +154,7 @@ class OverlayComponent {
   updateLightbox() {
     const videoElem = this.mediaState.state[this.index].videoElement.el;
     this.lightboxElem.appendChild(videoElem);
+    this.centerElem.style.backgroundColor = this.mediaState.state[this.index].color.color;
   }
 }
 

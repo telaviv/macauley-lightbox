@@ -12,11 +12,17 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: red;
+}
+
+.overlay .center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
 }
 
 .lightbox {
-    width: 400px;
-    height: 400px;
+    display: inline-block;
     background-color: white;
 }

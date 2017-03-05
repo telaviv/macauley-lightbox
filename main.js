@@ -2,6 +2,7 @@
 
 const LEFT_KEY = 37;
 const RIGHT_KEY = 39;
+const ESC_KEY = 27;
 
 const fetchJSON = (url) => {
   return new Promise((resolve, reject) => {
@@ -78,7 +79,7 @@ const averageColor = (imageData) => {
   const r = (sums.r / pixelCount).toFixed(0);
   const g = (sums.g / pixelCount).toFixed(0);
   const b = (sums.b / pixelCount).toFixed(0);
-  return `rgb(${r}, ${g}, ${b})`;
+  return `rgba(${r}, ${g}, ${b}, 0.75)`;
 }
 
 class GiphyMediaState {
@@ -156,8 +157,14 @@ class OverlayComponent {
     this.overlayElem.className = 'overlay show';
   }
 
+  hide() {
+    this.overlayElem.className = 'overlay hide';
+  }
+
   bindKeypresses(event) {
-    if (event.keyCode === LEFT_KEY) {
+    if (event.keyCode == ESC_KEY) {
+      this.hide();
+    } else if (event.keyCode === LEFT_KEY) {
       this.index = Math.max(0, this.index - 1);
     } else if (event.keyCode === RIGHT_KEY) {
       this.index = Math.min(this.mediaState.state.length - 1, this.index + 1);
@@ -184,6 +191,7 @@ const OVERLAY = new OverlayComponent(
   new GiphyMediaState('home alone')
 );
 
-document.querySelector('button').addEventListener('click', () => {
+document.querySelector('.gallery').addEventListener('click', () => {
   OVERLAY.show();
+  document.querySelector('.wrapper').className = 'wrapper blur';
 });

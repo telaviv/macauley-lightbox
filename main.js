@@ -152,8 +152,10 @@ class OverlayComponent {
     document.onkeydown = this.bindKeypresses.bind(this);
   }
 
-  display(mediaState) {
+  display(mediaState, loadingSrc) {
     this.mediaState = mediaState;
+    this.loadingSrc = loadingSrc;
+    this.index = 0;
     this.updateLightbox();
     this.overlayElem.className = 'overlay show';
   }
@@ -177,15 +179,39 @@ class OverlayComponent {
   updateLightbox() {
     const videoElem = this.mediaState.state[this.index].videoElement;
     const color = this.mediaState.state[this.index].color;
+    this.lightboxElem.innerHTML = '';
     if (videoElem.status === 'succeeded') {
-      this.lightboxElem.innerHTML = '';
       this.lightboxElem.appendChild(videoElem.el);
       // removing elements has a side effect of pausing them.
       videoElem.el.play();
+    } else if (videoElem.status === 'failed') {
+      this.lightboxElem.appendChild(this.failureElement());
+    } else if (videoElem.status === 'loading') {
+      this.lightboxElem.appendChild(this.loadingElement());
     }
+
     if (color.status === 'succeeded') {
       this.centerElem.style.backgroundColor = color.color;
     }
+  }
+
+  failureElement() {
+    const pElem = document.createElement('p');
+    pElem.className = 'message';
+    pElem.innerText = 'Sorry something wen\'t wrong :('
+    return pElem
+  }
+
+  loadingElement() {
+    const divElem = document.createElement('div');
+    const pElem = document.createElement('p');
+    pElem.innerText = 'loading ...'
+    const image = new Image()
+    image.src = this.loadingSrc;
+    divElem.className = 'message';
+    divElem.appendChild(image);
+    divElem.appendChild(pElem);
+    return divElem;
   }
 }
 
@@ -208,8 +234,9 @@ document.querySelectorAll('.gallery').forEach(() => {
     if (!event.target.parentElement.dataset.query) {
       return;
     }
-    const gallery = GIPHY_GALLERIES[event.target.parentElement.dataset.query]
-    OVERLAY.display(gallery);
+    const gallery = GIPHY_GALLERIES[event.target.parentElement.dataset.query];
+    const loader = event.target.parentElement.dataset.loader;
+    OVERLAY.display(gallery, loader);
     document.querySelector('.wrapper').className = 'wrapper blur';
   })
 });

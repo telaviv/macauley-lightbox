@@ -29,7 +29,7 @@ const createGiphyURL = (query, count) => {
 const fetchGiphyData = (query, count) => {
   return fetchJSON(createGiphyURL(query, count)).then((response) => {
     return response.data.map((data) => ({
-      movieUrl: data.images.downsized_small.mp4,
+      movieUrl: data.images.original.mp4,
       imageUrl: data.images.downsized_still.url,
     }));
   });
@@ -137,6 +137,7 @@ class GalleryState {
           };
           this.updateListener(i);
         }).catch(() => {
+          this.updateListener(i);
           this.state[i].videoElement = { status: 'failed' };
         });
         loadImageElement(imageUrl)
@@ -243,7 +244,7 @@ class OverlayComponent {
 const GIPHY_GALLERIES = {
   'home alone': new GalleryState('home alone', 10),
   'my girl': new GalleryState('my girl', 4),
-  'party monster': new GalleryState('party monster', 10),
+  'party monster': new GalleryState('party monster', 6),
 }
 
 const OVERLAY = new OverlayComponent(

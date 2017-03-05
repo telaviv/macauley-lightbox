@@ -39,19 +39,19 @@ h1 {
 .overlay.hide {
    height: 0%;
    opacity: 0;
-   transition: opacity 2s, height 0s;
-   transition-delay: 0s, 2s;
+   transition: opacity 1s, height 0s;
+   transition-delay: 0s, 1s;
 }
 
 .overlay.show {
     visibility: visible;
     opacity: 1;
     height: 100%;
-    transition: height 0s, opacity 2s;
+    transition: height 0s, opacity 1s;
 }
 
 .wrapper {
-    transition: 2s filter ease;
+    transition: 1s filter ease;
     filter: none;
 }
 

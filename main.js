@@ -285,9 +285,17 @@ class OverlayComponent {
     if (event.keyCode == ESC_KEY) {
       this.hide();
     } else if (event.keyCode === LEFT_KEY) {
-      this.index = Math.max(0, this.index - 1);
+      if (this.index === 0) {
+        this.hide();
+      } else {
+        this.index = this.index - 1;
+      }
     } else if (event.keyCode === RIGHT_KEY) {
-      this.index = Math.min(this.galleryState.state.length - 1, this.index + 1);
+      if (this.index === this.galleryState.state.length - 1) {
+        this.hide();
+      } else {
+        this.index = this.index + 1;
+      }
     }
     this.updateLightbox();
   }

@@ -5,6 +5,15 @@ const RIGHT_KEY = 39;
 const ESC_KEY = 27;
 
 const fetchJSON = (url) => {
+  /* Perform a get request to fetch parsed json.
+
+     Args:
+        url - { string }
+
+     Returns: { promise }
+        resolve - { object } - the parsed json blob
+        reject - { XMLHTTPRequest }
+  */
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open('GET', url, true);
@@ -20,6 +29,15 @@ const fetchJSON = (url) => {
 };
 
 const createGiphyURL = (query, count) => {
+  /* Creates a giphy url to fetch data.
+
+     Args:
+         query - a space seperated string to search for gifs on giphy
+         count - the amount of gifs to search for.
+
+     Returns: { string }
+
+   */
   const base =  'http://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&';
   const limitParam = 'limit=' + count;
   const queryParam = 'q=' + query.replace(' ', '+');
@@ -27,6 +45,16 @@ const createGiphyURL = (query, count) => {
 }
 
 const fetchGiphyData = (query, count) => {
+  /* Fetches giphy data.
+
+     Args:
+         query - a space seperated string to search for gifs on giphy
+         count - the amount of gifs to search for.
+
+     Returns: { promise }
+         resolve - { object } - giphy data
+         reject - { XMLHTTPRequest }
+   */
   return fetchJSON(createGiphyURL(query, count)).then((response) => {
     return response.data.map((data) => ({
       movieUrl: data.images.original.mp4,
@@ -36,6 +64,14 @@ const fetchGiphyData = (query, count) => {
 };
 
 const loadVideoElement = (url) => {
+  /* Creates a video element with a preloaded url.
+
+     Args:
+         url - a video url.
+
+     Returns: { promise }
+         resolve - { video } - A preloaded video.
+   */
   return new Promise((resolve, reject) => {
     const video = document.createElement('video');
     video.addEventListener('loadeddata', () => resolve(video));
@@ -47,6 +83,14 @@ const loadVideoElement = (url) => {
 };
 
 const loadImageElement = (url) => {
+  /* Creates an image element with a preloaded url.
+
+     Args:
+         url - an image url.
+
+     Returns: { promise }
+         resolve - { image } - A preloaded image.
+   */
   return new Promise((resolve, reject) => {
     const image = new Image()
     image.onload = () => resolve(image);
@@ -57,6 +101,13 @@ const loadImageElement = (url) => {
 }
 
 const loadImageDataFromElement = (imageElem) => {
+  /* Finds the ImageData of an image element.
+
+     Args:
+         imageElem - an image element.
+
+     Returns: { ImageData }
+   */
   const width = imageElem.naturalWidth;
   const height = imageElem.naturalHeight;
 
@@ -70,6 +121,14 @@ const loadImageDataFromElement = (imageElem) => {
 }
 
 const averageColor = (imageData) => {
+  /* Finds the average color of an image. We also add some transparency
+     to the color.
+
+     Args:
+         imageData - { ImageData }
+
+     Returns: { string } - a color to be used as a css property.
+   */
   const sums = {r: 0, g: 0, b: 0 };
   for (let i = 0; i < imageData.data.length; i += 4) {
     sums.r += imageData.data[i];

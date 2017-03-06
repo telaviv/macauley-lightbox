@@ -130,29 +130,37 @@ class GalleryState {
   load(query, count) {
     fetchGiphyData(query, count).then((giphyData) => {
       giphyData.forEach(({ movieUrl, imageUrl }, i) => {
-        loadVideoElement(movieUrl).then((videoElement) => {
-          this.state[i].videoElement = {
-            status: 'succeeded',
-            el: videoElement,
-          };
-          this.updateListener(i);
-        }).catch(() => {
-          this.updateListener(i);
-          this.state[i].videoElement = { status: 'failed' };
-        });
-        loadImageElement(imageUrl)
-          .then(loadImageDataFromElement)
-          .then(averageColor)
-          .then((color) => {
-            this.state[i].color = {
-              status: 'succeeded',
-              color,
-            };
-          }).catch(() => {
-            this.state[i].videoElement = { status: 'failed' };
-          });
+        this.loadVideoElement(movieUrl, i);
+        this.loadImageElement(imageUrl, i);
       });
     });
+  }
+
+  loadVideoElement(movieUrl, index) {
+    loadVideoElement(movieUrl).then((videoElement) => {
+      this.state[index].videoElement = {
+        status: 'succeeded',
+        el: videoElement,
+      };
+      this.updateListener(index);
+    }).catch(() => {
+      this.updateListener(index);
+      this.state[index].videoElement = { status: 'failed' };
+    });
+  }
+
+  loadImageElement(imageUrl, index) {
+    loadImageElement(imageUrl)
+      .then(loadImageDataFromElement)
+      .then(averageColor)
+      .then((color) => {
+        this.state[index].color = {
+          status: 'succeeded',
+          color,
+        };
+      }).catch(() => {
+        this.state[index].videoElement = { status: 'failed' };
+      });
   }
 }
 

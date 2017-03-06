@@ -345,7 +345,8 @@ OVERLAY.hideListener = () => {
 
 document.querySelectorAll('.gallery').forEach(() => {
   addEventListener('click', (event) => {
-    if (!event.target.parentElement.dataset.query) {
+    if (!(event.target.parentElement &&
+          event.target.parentElement.dataset.query)) {
       return;
     }
     const gallery = GIPHY_GALLERIES[event.target.parentElement.dataset.query];

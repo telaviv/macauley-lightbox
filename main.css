@@ -61,6 +61,7 @@ h1 {
 
 .overlay .center {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100%;
@@ -77,6 +78,10 @@ h1 {
 
 .lightbox video {
     width: 750px
+}
+
+.navigation {
+    font-size: 20px;
 }
 
 .message {

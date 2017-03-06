@@ -140,7 +140,7 @@ class GalleryState {
     loadVideoElement(movieUrl).then((videoElement) => {
       this.state[index].videoElement = {
         status: 'succeeded',
-        el: videoElement,
+        value: videoElement,
       };
       this.updateListener(index);
     }).catch(() => {
@@ -156,7 +156,7 @@ class GalleryState {
       .then((color) => {
         this.state[index].color = {
           status: 'succeeded',
-          color,
+          value: color,
         };
       }).catch(() => {
         this.state[index].videoElement = { status: 'failed' };
@@ -215,9 +215,9 @@ class OverlayComponent {
     const color = this.mediaState.state[this.index].color;
     this.lightboxElem.innerHTML = '';
     if (videoElem.status === 'succeeded') {
-      this.lightboxElem.appendChild(videoElem.el);
+      this.lightboxElem.appendChild(videoElem.value);
       // removing elements has a side effect of pausing them.
-      videoElem.el.play();
+      videoElem.value.play();
     } else if (videoElem.status === 'failed') {
       this.lightboxElem.appendChild(this.failureElement());
     } else if (videoElem.status === 'loading') {
@@ -225,7 +225,7 @@ class OverlayComponent {
     }
 
     if (color.status === 'succeeded') {
-      this.centerElem.style.backgroundColor = color.color;
+      this.centerElem.style.backgroundColor = color.value;
     }
   }
 

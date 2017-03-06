@@ -91,21 +91,23 @@ class GalleryState {
      1) The actual mp4 video to display.
      2) The color to display outside of the video. Derived from a still of the video.
 
-     All in all we will need to load 10 videos and 10 images to derive our color. To
+     All in all we will need to load a lot of images and videos to derive our color. To
      make this performant we want to load all these images and videos simultaneously.
 
-     GiphyMediaState is a helper class that encapsulates the complexity of a data
-     structure that is loading over time. At the heart of the data structure is an
-     array of objects with the following properties:
+     GalleryState is a helper class that encapsulates the complexity of a data
+     structure that is loading over time. At the heart of the class is the "state"
+     property which is an array of media objects with the following properties:
 
-         videoElement - The video element of the gif.
-         color - A string that can be a css property value.
+         videoElement
+             status - loading, succeeded, or failed
+             value - A video element.
+         color
+             status - loading, succeeded, or failed
+             value - A string that can be used as a color property. It's a transparent
+                 color derived from a still of the video.
 
-     Each of these properties also has a "status" property which can be "succeeded",
-     "failed" or "loading".
-
-
-
+     You can also add a listener with the "addListener" method. This will be notified
+     as the status of the videoElement changes.
   */
   constructor(query, count) {
     this.updateListener = () => {};
@@ -165,6 +167,17 @@ class GalleryState {
 }
 
 class OverlayComponent {
+  /*
+     Manages the full page overlay and lightbox.
+
+     public methods:
+         displayLightbox - display a gallery in the lightbox.
+         hide - hide the overlay.
+
+     public property:
+         hideListener - callback that's notified when hiding.
+  */
+
   constructor(overlayElem) {
     this.overlayElem = overlayElem;
     this.centerElem = overlayElem.querySelector('.center');
@@ -175,12 +188,19 @@ class OverlayComponent {
     document.onkeydown = this.bindKeypresses.bind(this);
   }
 
-  display(mediaState, loadingSrc) {
-    if (this.mediaState) {
-      this.mediaState.removeListener();
+  displayLightbox(galleryState, loadingSrc) {
+    /*
+       Displays a gallery in the lightbox.
+
+       Args:
+           galleryState - an instance of GalleryState.
+           loadingSrc - the url of an image to show while loading.
+    */
+    if (this.galleryState) {
+      this.galleryState.removeListener();
     }
-    this.mediaState = mediaState;
-    this.mediaState.addListener(this.onGalleryUpdate.bind(this));
+    this.galleryState = galleryState;
+    this.galleryState.addListener(this.onGalleryUpdate.bind(this));
 
     this.loadingSrc = loadingSrc;
     this.index = 0;
@@ -195,6 +215,9 @@ class OverlayComponent {
   }
 
   hide() {
+    /*
+       Hide the overlay.
+    */
     this.overlayElem.className = 'overlay hide';
     this.hideListener();
   }
@@ -205,14 +228,14 @@ class OverlayComponent {
     } else if (event.keyCode === LEFT_KEY) {
       this.index = Math.max(0, this.index - 1);
     } else if (event.keyCode === RIGHT_KEY) {
-      this.index = Math.min(this.mediaState.state.length - 1, this.index + 1);
+      this.index = Math.min(this.galleryState.state.length - 1, this.index + 1);
     }
     this.updateLightbox();
   }
 
   updateLightbox() {
-    const videoElem = this.mediaState.state[this.index].videoElement;
-    const color = this.mediaState.state[this.index].color;
+    const videoElem = this.galleryState.state[this.index].videoElement;
+    const color = this.galleryState.state[this.index].color;
     this.lightboxElem.innerHTML = '';
     if (videoElem.status === 'succeeded') {
       this.lightboxElem.appendChild(videoElem.value);
@@ -255,9 +278,7 @@ const GIPHY_GALLERIES = {
   'party monster': new GalleryState('party monster', 6),
 }
 
-const OVERLAY = new OverlayComponent(
-  document.querySelector('.overlay')
-);
+const OVERLAY = new OverlayComponent(document.querySelector('.overlay'));
 
 OVERLAY.hideListener = () => {
   document.querySelector('.wrapper').className = 'wrapper';
@@ -270,7 +291,7 @@ document.querySelectorAll('.gallery').forEach(() => {
     }
     const gallery = GIPHY_GALLERIES[event.target.parentElement.dataset.query];
     const loader = event.target.parentElement.dataset.loader;
-    OVERLAY.display(gallery, loader);
+    OVERLAY.displayLightbox(gallery, loader);
     document.querySelector('.wrapper').className = 'wrapper blur';
   })
 });
